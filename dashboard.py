@@ -4,6 +4,8 @@
 import dash
 from dash import html
 from dash import dcc
+from dash import Input
+from dash import Output
 from dash.dash_table import DataTable
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -37,8 +39,17 @@ app.layout = html.Div([
     ]),
     html.Br(),
     html.Div(id='my-output'),
-
-    dcc.Graph(figure=fig)
+    dcc.Graph(figure=fig),
+    
+    html.H4('Interactive scatter plot with data'),
+    dcc.Graph(id="scatter-plot"),
+    html.P("Filter by PacketCounter:"),
+    dcc.RangeSlider(
+        id='range-slider',
+        min=0, max=15, step=0.1,
+        marks={0: '0', 15: '15'},
+        value=[5, 10]
+    ),
 ])
 
 
@@ -57,6 +68,21 @@ def update_output(value):
 def update_output_div(input_value):
     return f'Output: {input_value}'
 
+
+@app.callback(
+    Output("scatter-plot", "figure"), 
+    Input("range-slider", "value"))
+def update_bar_chart(slider_range):
+    df = pd.read_csv('Data/mydata.csv',nrows=15) # replace with your own data source
+
+    low, high = slider_range
+    mask = (df['PacketCounter'] > low) & (df['PacketCounter'] < high)
+    fig = px.scatter(
+        df[mask], x="PacketCounter", y="Euler_X", 
+        color="Euler_X", size='PacketCounter', 
+        hover_data=['PacketCounter'],
+        )
+    return fig
 
 if __name__ == '__main__':
     app.run_server(host='localhost', port=8050, debug=True)
