@@ -33,5 +33,6 @@ def print_test_data():
 if __name__ == '__main__':
     # Call the function to print the data before running the server
     print_test_data()
+    
     # Run the Flask app
     server.run(host='localhost', port=8055, debug=True)
